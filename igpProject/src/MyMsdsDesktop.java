@@ -1,5 +1,9 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Vector;
 import javax.swing.*;
 import javax.swing.event.*;
 /*
@@ -12,7 +16,11 @@ import javax.swing.event.*;
  * @author Eric Jorens
  */
 public class MyMsdsDesktop extends JFrame {
-	
+  // xlsBook represent a list of CompoundBook - a list of our table in form of an object parsed 
+  final ArrayList<CompoundBook> xlsBook = new ArrayList<CompoundBook>();
+  // groups is a vector that contain the name of our different group
+  final Vector<String> groups = new Vector<String>();	
+    
 	public MyMsdsDesktop() {
 		super("MyMsdsDesktop");
 		initComponents();
@@ -346,13 +354,31 @@ public class MyMsdsDesktop extends JFrame {
 
 						//======== gScroll2 ========
 						{
+                                                //---- gList ----
+
+                                                    //sample data
+
+                                                    setGroupList();
+                                                    //set the list
 
 							//---- gList2 ----
 							gList2.setMinimumSize(new Dimension(40, 100));
 							gList2.addListSelectionListener(new ListSelectionListener() {
-								
-								public void valueChanged(ListSelectionEvent e) {
-									gListValueChanged(e);
+							
+					                    public void valueChanged(ListSelectionEvent e) {
+                                                                if (!e.getValueIsAdjusting()) {//check if the value is adjusted
+                                                                    int size = xlsBook.get(gList2.getSelectedIndex()).getBook().size();//get the size (number of coumpoud) of the selected Compoundbook int the xlsBook
+                                                                    String[] comps = new String[size];// array of commpounds set to the size (number of element) of the compoundBook
+                                                                    for (int i = 0; i < size; i++) {// this loop is addind coupound names in the array comps
+                                                                        comps[i] = xlsBook.get(gList2.getSelectedIndex()).getBook().get(i).get(0).getContents();
+                                                                    }
+                                                                    //String[] name = {"compoud name", "Manufacturer", "Catalog #", "Location", "Size", "Quantity", "Amount Remaining", "Date Received", "CAS #"};
+                                                                    //mText.setText(CompoundBook.displayRows(xlsBook.get(gList2.getSelectedIndex()).getBook(), name));
+                                                                    //mText2.setText((xlsBook.get(gList.getSelectedIndex()).displayRows(xlsBook.get(gList.getSelectedIndex()).getBook())));
+                                                                    cList2.setListData(comps);// setting the compound list in the gui
+                                                                }
+                       
+                                                                    gListValueChanged(e);
 								}
 							});
 							gScroll2.setViewportView(gList2);
@@ -380,7 +406,52 @@ public class MyMsdsDesktop extends JFrame {
 								gAdd.addActionListener(new ActionListener() {
 									
 									public void actionPerformed(ActionEvent e) {
-										gAddActionPerformed(e);
+									// I used the dialog box to get input
+                                                                        String filename = JOptionPane.showInputDialog(null, "Create a new group : ", "Add a new coumpond", 1);
+
+                                                                        if (filename != null) {
+                                                                            JOptionPane.showMessageDialog(null, "You created the group : " + filename, "File created", 1);
+                                                                            //Create a new .xls file
+                                                                            File file = new File(filename + ".xls");
+                                                                            CompoundBook.initEmptySheet(filename+".xls", 9);
+                                                                            CompoundBook book = new CompoundBook(filename+".xls");
+                                                                            //add the new group our xlsBook (objec) and the group list 
+                                                                            xlsBook.add(book); 
+                                                                            groups.add(filename);
+                                                                            gList2.setListData(groups);
+                                                                            /*
+                                                                            * To actually create a file specified by a
+                                                                            * pathname, use boolean createNewFile() method of
+                                                                            * Java File class.
+                                                                            *
+                                                                            * This method creates a new empty file specified if
+                                                                            * the file with same name does not exists.
+                                                                            *
+                                                                            * This method returns true if the file with the
+                                                                            * same name did not exist and it was created
+                                                                            * successfully, false otherwise.
+                                                                            */
+
+                                                                            boolean blnCreated = false;
+                                                                            try {
+                                                                                blnCreated = file.createNewFile();
+                                                                            } catch (IOException ioe) {
+                                                                                System.out.println("Error while creating a new empty file :" + ioe);
+                                                                            }
+                                                                            if (blnCreated) {
+                                                                                JOptionPane.showMessageDialog(null, "You created the file: " + filename+".xls",
+                                                                                        "Roseindia.net", 1);
+                                                                            }
+                                                                            /*
+                                                                            * If you run the same program 2 times, first time
+                                                                            * it should return true. But when we run it second
+                                                                            * time, it returns false because file was already
+                                                                            * exist.
+                                                                            */
+                                                                            //System.out.println("Was file " + file.getPath() + " created ? : " + blnCreated);
+
+                                                                        }	
+                                                                            gAddActionPerformed(e);
 									}
 								});
 								gButtonPanel.add(gAdd);
@@ -393,7 +464,25 @@ public class MyMsdsDesktop extends JFrame {
 								gRemove.setToolTipText("Remove selected Group");
 								gRemove.addActionListener(new ActionListener() {
 									public void actionPerformed(ActionEvent e) {
-										gRemoveActionPerformed(e);
+                                                                              if (!gList2.isSelectionEmpty()) {
+                                                                                String filename = groups.get(gList2.getSelectedIndex()) + ".xls";
+                                                                                
+                                                                            
+                                                                                int result = JOptionPane.showConfirmDialog(null,
+                                                                                        "Do you want to remove :" + filename, "information",
+                                                                                        JOptionPane.YES_NO_CANCEL_OPTION, 1);
+                                                                                if (result == JOptionPane.YES_OPTION) {
+                                                                                    boolean success = (new File(filename)).delete();
+                                                                                    if (success) {
+                                                                                        JOptionPane.showMessageDialog(null, "You have successfuly remove the group : " + filename, "File removed", 2);
+                                                                                        xlsBook.remove(gList2.getSelectedIndex());
+                                                                                        groups.remove(gList2.getSelectedIndex());
+                                                                                        gList2.setListData(groups);
+                                                                                    }
+
+                                                                                }
+                                                                            }
+                                                                            gRemoveActionPerformed(e);
 									}
 								});
 								gButtonPanel.add(gRemove);
@@ -446,7 +535,17 @@ public class MyMsdsDesktop extends JFrame {
 							cList2.addListSelectionListener(new ListSelectionListener() {
 								
 								public void valueChanged(ListSelectionEvent e) {
-									cListValueChanged(e);
+								      if (!e.getValueIsAdjusting()) {// check if the value of the cList selection has been changed
+                                                                          String[] name = {"compoud name", "Manufacturer", "Catalog #", "Location", "Size", "Quantity", "Amount Remaining", "Date Received", "CAS #"};
+                                                                          if (!cList2.isSelectionEmpty()) {// in the case that the user selects another group, to avoid cList to be empty
+                                                                              mText.setText(CompoundBook.displayRow(cList2.getSelectedIndex(), xlsBook.get(gList2.getSelectedIndex()).getBook(), name));
+                                                                              cListValueChanged(e);
+                                                                          } else {
+                                                                              mText.setText("");
+                                                                          }
+                            
+                        }
+                                                                    cListValueChanged(e);
 								}
 							});
 							cScroll2.setViewportView(cList2);
@@ -793,7 +892,34 @@ public class MyMsdsDesktop extends JFrame {
 	private JInternalFrame myCalc;
 	// JFormDesigner - End of variables declaration  //GEN-END:variables
 	
-	
+	   // JFormDesigner - End of variables declaration  //GEN-END:variables
+    
+    /**
+     * This program set the group list by adding all the .xls file in the current working
+     * folder
+     */
+    public void setGroupList() {
+        
+        String path = "."; //curent folder
+        String files; //files name
+        File folder = new File(path); // get the folfer
+        File[] listOfFiles = folder.listFiles(); //list of files
+        for (int i = 0; i < listOfFiles.length; i++) {//this loop go trough the folder
+            if (listOfFiles[i].isFile()) {
+                files = listOfFiles[i].getName();
+                if (files.endsWith(".xls") || files.endsWith(".XLS")) {//filter all the xls file
+                    if(!files.equalsIgnoreCase(".xls")){
+                    // add a new objet CompoundBook in a our xlsBook
+                    xlsBook.add(new CompoundBook(files));
+                    //add only the name of the file without the .xls extension
+                    groups.add(files.substring(0, files.lastIndexOf(".")));
+                    }
+                }
+            }
+        }
+        gList2.setListData(groups); // set the group List on the GUI
+    }
+        
 	public static void main(String[] args) {
 		MyMsdsDesktop t = new MyMsdsDesktop();
 		t.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
