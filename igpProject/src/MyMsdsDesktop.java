@@ -1,3 +1,4 @@
+import compound.CompoundBook;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
@@ -6,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Vector;
 import javax.swing.*;
 import javax.swing.event.*;
+
+
 /*
  * Created by JFormDesigner on Mon Apr 02 22:50:53 EDT 2012
  */
@@ -367,6 +370,7 @@ public class MyMsdsDesktop extends JFrame {
 							
 					                    public void valueChanged(ListSelectionEvent e) {
                                                                 if (!e.getValueIsAdjusting()) {//check if the value is adjusted
+                                                                    //there's some jind of error here
                                                                     int size = xlsBook.get(gList2.getSelectedIndex()).getBook().size();//get the size (number of coumpoud) of the selected Compoundbook int the xlsBook
                                                                     String[] comps = new String[size];// array of commpounds set to the size (number of element) of the compoundBook
                                                                     for (int i = 0; i < size; i++) {// this loop is addind coupound names in the array comps
@@ -466,18 +470,27 @@ public class MyMsdsDesktop extends JFrame {
 									public void actionPerformed(ActionEvent e) {
                                                                               if (!gList2.isSelectionEmpty()) {
                                                                                 String filename = groups.get(gList2.getSelectedIndex()) + ".xls";
-                                                                                
+                                                                                cList2.clearSelection();
+                                                                                cList2.removeAll();
                                                                             
                                                                                 int result = JOptionPane.showConfirmDialog(null,
                                                                                         "Do you want to remove :" + filename, "information",
                                                                                         JOptionPane.YES_NO_CANCEL_OPTION, 1);
                                                                                 if (result == JOptionPane.YES_OPTION) {
                                                                                     boolean success = (new File(filename)).delete();
+                                                                                   
+                                                                              
                                                                                     if (success) {
                                                                                         JOptionPane.showMessageDialog(null, "You have successfuly remove the group : " + filename, "File removed", 2);
-                                                                                        xlsBook.remove(gList2.getSelectedIndex());
-                                                                                        groups.remove(gList2.getSelectedIndex());
+                                                                                        int index = gList2.getSelectedIndex();
+                                                                                        xlsBook.remove(index);
+                                                                                        groups.remove(index);
+                                                                                        
                                                                                         gList2.setListData(groups);
+                                                                                        
+                                                                                        gList2.clearSelection();
+                                                                                        
+                                                                                        
                                                                                     }
 
                                                                                 }
@@ -536,7 +549,7 @@ public class MyMsdsDesktop extends JFrame {
 								
 								public void valueChanged(ListSelectionEvent e) {
 								      if (!e.getValueIsAdjusting()) {// check if the value of the cList selection has been changed
-                                                                          String[] name = {"compoud name", "Manufacturer", "Catalog #", "Location", "Size", "Quantity", "Amount Remaining", "Date Received", "CAS #"};
+                                                                          String[] name = {"compound name", "Manufacturer", "Catalog #", "Location", "Size", "Quantity", "Amount Remaining", "Date Received", "CAS #"};
                                                                           if (!cList2.isSelectionEmpty()) {// in the case that the user selects another group, to avoid cList to be empty
                                                                               mText.setText(CompoundBook.displayRow(cList2.getSelectedIndex(), xlsBook.get(gList2.getSelectedIndex()).getBook(), name));
                                                                               cListValueChanged(e);
@@ -659,7 +672,16 @@ public class MyMsdsDesktop extends JFrame {
 							mEditButton.addActionListener(new ActionListener() {
 								
 								public void actionPerformed(ActionEvent e) {
-									mEditButtonActionPerformed(e);
+                                                                String [] row = CompoundBook.rowToArray(cList2.getSelectedIndex(), xlsBook.get(gList2.getSelectedIndex()).getBook());
+								EditWindow gui = new EditWindow(MyMsdsDesktop.this, row);
+                                                                gui.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+                                                                gui.setSize(300,300);
+                                                                gui.setLocation(300,300);
+                                                                gui.setVisible(true);
+                                                                
+                                                                
+                                                                        
+                                                                    mEditButtonActionPerformed(e);
 								}
 							});
 							mButtonPanel.add(mEditButton);
