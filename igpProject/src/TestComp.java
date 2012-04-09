@@ -30,7 +30,7 @@ public class TestComp {
         System.out.println(xlfile.getBook().get(1).size());
         System.out.println(CompoundBook.rowToArray(0, xlfile.getBook()));
         //xlfile.addCompound(compound);
-        System.out.println( CompoundBook.displayRow(xlfile.search(args[1])));
+        //System.out.println( CompoundBook.displayRow(xlfile.search(args[1])));
         //System.out.println( xlfile.displayRows(xlfile.search( args[1],args[2])));
         // TODO code application logic here
         

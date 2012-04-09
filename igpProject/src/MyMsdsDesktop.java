@@ -1,3 +1,4 @@
+import GuiMyMSDS.AddWindow;
 import compound.CompoundBook;
 import java.awt.*;
 import java.awt.event.*;
@@ -23,7 +24,8 @@ public class MyMsdsDesktop extends JFrame {
   final ArrayList<CompoundBook> xlsBook = new ArrayList<CompoundBook>();
   // groups is a vector that contain the name of our different group
   final Vector<String> groups = new Vector<String>();	
-    
+  DefaultListModel groupList = new DefaultListModel();
+  DefaultListModel compList = new DefaultListModel();
 	public MyMsdsDesktop() {
 		super("MyMsdsDesktop");
 		initComponents();
@@ -145,7 +147,10 @@ public class MyMsdsDesktop extends JFrame {
 	private void initComponents() {
 		// JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
 		// Generated using JFormDesigner Evaluation license - Eric Jorens
-		menuBar1 = new JMenuBar();
+		
+                                                                        
+            
+                menuBar1 = new JMenuBar();
 		mFile = new JMenu();
 		mExit = new JMenuItem();
 		mWindow = new JMenu();
@@ -162,7 +167,7 @@ public class MyMsdsDesktop extends JFrame {
 		gPanel = new JPanel();
 		gLab = new JLabel();
 		gScroll2 = new JScrollPane();
-		gList2 = new JList();
+		gList2 = new JList(groupList);
 		gSubPanel = new JPanel();
 		gButtonPanel = new JPanel();
 		gAdd = new JButton();
@@ -369,16 +374,14 @@ public class MyMsdsDesktop extends JFrame {
 							gList2.addListSelectionListener(new ListSelectionListener() {
 							
 					                    public void valueChanged(ListSelectionEvent e) {
-                                                                if (!e.getValueIsAdjusting()) {//check if the value is adjusted
-                                                                    //there's some jind of error here
+                                                                if (!e.getValueIsAdjusting() && !gList2.isSelectionEmpty()) {//check if the value is adjusted 
+                                                                    //there's some kind of error here
                                                                     int size = xlsBook.get(gList2.getSelectedIndex()).getBook().size();//get the size (number of coumpoud) of the selected Compoundbook int the xlsBook
                                                                     String[] comps = new String[size];// array of commpounds set to the size (number of element) of the compoundBook
                                                                     for (int i = 0; i < size; i++) {// this loop is addind coupound names in the array comps
                                                                         comps[i] = xlsBook.get(gList2.getSelectedIndex()).getBook().get(i).get(0).getContents();
                                                                     }
-                                                                    //String[] name = {"compoud name", "Manufacturer", "Catalog #", "Location", "Size", "Quantity", "Amount Remaining", "Date Received", "CAS #"};
-                                                                    //mText.setText(CompoundBook.displayRows(xlsBook.get(gList2.getSelectedIndex()).getBook(), name));
-                                                                    //mText2.setText((xlsBook.get(gList.getSelectedIndex()).displayRows(xlsBook.get(gList.getSelectedIndex()).getBook())));
+                                                                    
                                                                     cList2.setListData(comps);// setting the compound list in the gui
                                                                 }
                        
@@ -423,6 +426,12 @@ public class MyMsdsDesktop extends JFrame {
                                                                             xlsBook.add(book); 
                                                                             groups.add(filename);
                                                                             gList2.setListData(groups);
+                                                                            if(!cList2.isSelectionEmpty()){
+                                                                                    cList2.clearSelection();
+                                                                                    gList2.clearSelection();
+                                                                                    cList2.removeAll();
+                                                                                    cList2.setModel(compList);
+                                                                             }
                                                                             /*
                                                                             * To actually create a file specified by a
                                                                             * pathname, use boolean createNewFile() method of
@@ -445,6 +454,7 @@ public class MyMsdsDesktop extends JFrame {
                                                                             if (blnCreated) {
                                                                                 JOptionPane.showMessageDialog(null, "You created the file: " + filename+".xls",
                                                                                         "Roseindia.net", 1);
+                                                                                
                                                                             }
                                                                             /*
                                                                             * If you run the same program 2 times, first time
@@ -468,28 +478,27 @@ public class MyMsdsDesktop extends JFrame {
 								gRemove.setToolTipText("Remove selected Group");
 								gRemove.addActionListener(new ActionListener() {
 									public void actionPerformed(ActionEvent e) {
-                                                                              if (!gList2.isSelectionEmpty()) {
+                                                                        
+                                                                            if (!gList2.isSelectionEmpty()) {
                                                                                 String filename = groups.get(gList2.getSelectedIndex()) + ".xls";
-                                                                                cList2.clearSelection();
-                                                                                cList2.removeAll();
-                                                                            
+                                                                                
                                                                                 int result = JOptionPane.showConfirmDialog(null,
                                                                                         "Do you want to remove :" + filename, "information",
                                                                                         JOptionPane.YES_NO_CANCEL_OPTION, 1);
                                                                                 if (result == JOptionPane.YES_OPTION) {
                                                                                     boolean success = (new File(filename)).delete();
-                                                                                   
+                                                                                   if(!cList2.isSelectionEmpty()){
+                                                                                      cList2.clearSelection();
+                                                                                      //cList2.removeAll();
+                                                                                      //cList2 = new JList(compList);
+                                                                                    }
                                                                               
                                                                                     if (success) {
                                                                                         JOptionPane.showMessageDialog(null, "You have successfuly remove the group : " + filename, "File removed", 2);
                                                                                         int index = gList2.getSelectedIndex();
                                                                                         xlsBook.remove(index);
-                                                                                        groups.remove(index);
-                                                                                        
+                                                                                        groups.remove(index);        
                                                                                         gList2.setListData(groups);
-                                                                                        
-                                                                                        gList2.clearSelection();
-                                                                                        
                                                                                         
                                                                                     }
 
@@ -587,7 +596,29 @@ public class MyMsdsDesktop extends JFrame {
 								cAdd.addActionListener(new ActionListener() {
 									
 									public void actionPerformed(ActionEvent e) {
-										cAddActionPerformed(e);
+                                                                            
+                                                                            int index = cList2.getSelectedIndex(); // get the index of the compound 
+                                                                            CompoundBook book = xlsBook.get(gList2.getSelectedIndex()); // get the book of the specific compound
+                                                                            AddWindow gui = new AddWindow(MyMsdsDesktop.this, book); // open the edit window
+                                                                            gui.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+                                                                            gui.setSize(400, 350);
+                                                                            gui.setLocation(300, 300);
+                                                                            gui.setVisible(true);
+                                                                            System.out.println(gui.getUpdate());
+                                                                            cList2.clearSelection();
+                                                                            if (gui.getUpdate()) {
+                                                                                String files = new String(groups.elementAt(gList2.getSelectedIndex()));
+                                                                                xlsBook.add(gList2.getSelectedIndex(), new CompoundBook(files + ".xls"));
+                                                                                int size = xlsBook.get(gList2.getSelectedIndex()).getBook().size();//get the size (number of coumpoud) of the selected Compoundbook int the xlsBook
+                                                                                String[] comps = new String[size];// array of commpounds set to the size (number of element) of the compoundBook
+                                                                                for (int i = 0; i < size; i++) {// this loop is addind coupound names in the array comps
+                                                                                    comps[i] = xlsBook.get(gList2.getSelectedIndex()).getBook().get(i).get(0).getContents();
+                                                                                }
+
+                                                                                cList2.setListData(comps);// setting the compound list in the gui
+                                                                            }
+                                                                            
+                                                                            cAddActionPerformed(e);
 									}
 								});
 								cButtonPanel.add(cAdd);
@@ -601,7 +632,43 @@ public class MyMsdsDesktop extends JFrame {
 								cRemove.addActionListener(new ActionListener() {
 									
 									public void actionPerformed(ActionEvent e) {
-										cRemoveActionPerformed(e);
+									if (!cList2.isSelectionEmpty()) {
+                                                                                int indC = cList2.getAnchorSelectionIndex();
+                                                                                int indG = gList2.getSelectedIndex();
+                                                                                CompoundBook book = xlsBook.get(indG);
+                                                                                String compound = book.getBook().get(indC).get(0).getContents();
+                                                                                cList2.clearSelection();
+                                                                                
+                                                                            
+                                                                                int result = JOptionPane.showConfirmDialog(null,
+                                                                                        "Do you want to remove :" + compound, "information",
+                                                                                        JOptionPane.YES_NO_CANCEL_OPTION, 1);
+                                                                                if (result == JOptionPane.YES_OPTION) {
+                                                                                    boolean success = book.removeCompound(indC) ;
+                                                                                   
+                                                                              
+                                                                                    if (success) {
+                                                                                        JOptionPane.showMessageDialog(null, "You have successfuly remove the compound : " + compound, "Compound removed", 2);
+                                                                                      
+                                                                                        
+                                                                                        CompoundBook copybook = new CompoundBook(book.getFileName());
+                                                                                        //add the new group our xlsBook (objec) and the group list 
+                                                                                        xlsBook.add(indG, copybook);
+                                                                                        String files = new String(groups.elementAt(gList2.getSelectedIndex()));
+
+                                                                                        int size = xlsBook.get(gList2.getSelectedIndex()).getBook().size();//get the size (number of coumpoud) of the selected Compoundbook int the xlsBook
+                                                                                        String[] comps = new String[size];// array of commpounds set to the size (number of element) of the compoundBook
+                                                                                        for (int i = 0; i < size; i++) {// this loop is addind coupound names in the array comps
+                                                                                            comps[i] = xlsBook.get(gList2.getSelectedIndex()).getBook().get(i).get(0).getContents();
+                                                                                        }
+
+                                                                                    cList2.setListData(comps);// setting the compound list in the gui                                                     
+                                                                                        
+                                                                                    }
+
+                                                                                }
+                                                                            }	
+                                                                            cRemoveActionPerformed(e);
 									}
 								});
 								cButtonPanel.add(cRemove);
@@ -672,14 +739,33 @@ public class MyMsdsDesktop extends JFrame {
 							mEditButton.addActionListener(new ActionListener() {
 								
 								public void actionPerformed(ActionEvent e) {
-                                                                String [] row = CompoundBook.rowToArray(cList2.getSelectedIndex(), xlsBook.get(gList2.getSelectedIndex()).getBook());
-								EditWindow gui = new EditWindow(MyMsdsDesktop.this, row);
+                                                                    
+                                                                int index = cList2.getSelectedIndex(); // get the index of the compound 
+                                                                CompoundBook book = xlsBook.get(gList2.getSelectedIndex()); // get the book of the specific compound
+                                                                String [] row = CompoundBook.rowToArray(index, book.getBook());// parse the the information of the compound into an array
+								EditWindow gui = new EditWindow(MyMsdsDesktop.this, row, index, book); // open the edit window
                                                                 gui.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-                                                                gui.setSize(300,300);
+                                                                gui.setSize(400,350);
                                                                 gui.setLocation(300,300);
+//                                                                gui.getRootPane().setOpaque(false);
+//                                                                gui.getContentPane().setBackground(new Color(1, 1, 1, 1));
+//                                                                gui.setBackground(new Color(1, 1, 1, 1));
                                                                 gui.setVisible(true);
-                                                                
-                                                                
+                                                                System.out.println(gui.getUpdate());
+                                                                cList2.clearSelection();
+                                                                if(gui.getUpdate()){
+                                                                    String files = new String(groups.elementAt(gList2.getSelectedIndex()));
+                                                                    xlsBook.add(gList2.getSelectedIndex(), new CompoundBook(files + ".xls"));
+                                                                    int size = xlsBook.get(gList2.getSelectedIndex()).getBook().size();//get the size (number of coumpoud) of the selected Compoundbook int the xlsBook
+                                                                    String[] comps = new String[size];// array of commpounds set to the size (number of element) of the compoundBook
+                                                                    for (int i = 0; i < size; i++) {// this loop is addind coupound names in the array comps
+                                                                        comps[i] = xlsBook.get(gList2.getSelectedIndex()).getBook().get(i).get(0).getContents();
+                                                                    }
+ 
+                                                                    cList2.setListData(comps);// setting the compound list in the gui
+                                                                }
+                                                                                                               
+                                                               
                                                                         
                                                                     mEditButtonActionPerformed(e);
 								}

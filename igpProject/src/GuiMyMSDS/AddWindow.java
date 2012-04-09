@@ -1,8 +1,8 @@
-/**
- * @author      Buildman Biyong
- * @version     1.0                 (the version of the package this class was first added to)                   
- * @since       2012-03-19          (a date or the version number of this program)
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
+package GuiMyMSDS;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -17,8 +17,7 @@ import compound.CompoundBook;
  *
  * @author bbuildman
  */
-public class EditWindow extends JDialog {
-    
+public class AddWindow extends JDialog {
     private JLabel compoundName, manufacturer, catalog,
             location, size, quantity, amRem,
             dateReceived, cas ;
@@ -26,8 +25,8 @@ public class EditWindow extends JDialog {
     private JButton editButton, cancelButton;
     private ArrayList<String> updates;
     private boolean update = false;
-    
-    public EditWindow (JFrame frame, String[] row, final int index, final CompoundBook book){
+   
+    public AddWindow (JFrame frame, final CompoundBook book){
         
         super(frame,"Edit Compound",true);
         
@@ -61,49 +60,47 @@ public class EditWindow extends JDialog {
         
         compoundName = new JLabel("Compound Name");
         add(compoundName, leftCons);
-        a = new JTextField(row[0],10);
+        a = new JTextField("",10);
         add(a, rightCons);
         
        manufacturer = new JLabel("Manufacturer");
         add(manufacturer, leftCons);        
-        b = new JTextField(row[1],10);
+        b = new JTextField("-",10);
         add(b, rightCons);
         
         catalog = new JLabel("Catalog");
         add(catalog, leftCons);   
-        c = new JTextField(row[2],10);
+        c = new JTextField("-",10);
         add(c, rightCons);
           
         location = new JLabel("Location");
         add(location, leftCons);
-        d = new JTextField(row[3],10);
+        d = new JTextField("-",10);
         add(d, rightCons);
        
         size = new JLabel("Size");
         add(size, leftCons);
-        e = new JTextField(row[4],10);
+        e = new JTextField("-",10);
         add(e, rightCons);
-             
-       
+                    
         quantity = new JLabel("quantity");
         add(quantity, leftCons);
-        f = new JTextField(row[5],10);
+        f = new JTextField("-",10);
         add(f, rightCons);
               
-       
         amRem = new JLabel("Amount remaining");
         add(amRem, leftCons);
-        g = new JTextField(row[6],10);
+        g = new JTextField("-",10);
         add(g,rightCons);
         
         dateReceived = new JLabel("Date received");
         add(dateReceived, leftCons);
-        h = new JTextField(row[6],10);
+        h = new JTextField("-",10);
         add(h,rightCons);  
         
         cas = new JLabel("CAS #");
         add(cas, leftCons);
-        i = new JTextField(row[6],10);
+        i = new JTextField("-",10);
         add(i,rightCons);
         
         editButton = new JButton("update");
@@ -122,7 +119,7 @@ public class EditWindow extends JDialog {
                 updates.add(g.getText());
                 updates.add(h.getText());
                 updates.add(i.getText());
-                book.editCompound(index, updates);
+                book.addCompound(updates);
                 update =  true;
                 
                 setVisible(false);
@@ -146,6 +143,4 @@ public class EditWindow extends JDialog {
    public boolean getUpdate(){
        return update;
    }
-    
-
 }

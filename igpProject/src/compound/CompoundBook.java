@@ -284,7 +284,7 @@ public class CompoundBook {
      * @param index index of a row in @param book
      * @param compound ArrayList<String> store the compounds information
      */
-    public void editCompound(int index, ArrayList<String> compound) {
+    public  void editCompound(int index, ArrayList<String> compound) {
         File inputWb = new File(fileName);
         ArrayList<Cell> comp = new ArrayList<Cell>();
         Workbook w;
@@ -511,6 +511,12 @@ public class CompoundBook {
         }
     }
     
+    /**
+     * 
+     * @param index
+     * @param rows
+     * @return 
+     */
        public static String[] rowToArray(int index, ArrayList<ArrayList<Cell>> rows) {
     
         // go trough the search book;
@@ -528,4 +534,46 @@ public class CompoundBook {
      
         return aRow;
     }
+       
+       
+       public boolean removeCompound(int index) {
+        File inputWb = new File(fileName);
+        ArrayList<Cell> comp = new ArrayList<Cell>();
+        Workbook w;
+        boolean success = false;
+        try {
+            
+            //create workbook object from the file 
+            w = Workbook.getWorkbook(inputWb);
+            
+            //create a copy of the workbook
+            WritableWorkbook copy = Workbook.createWorkbook(new File(this.fileName), w);
+            Sheet sheet = w.getSheet(0);
+            
+            //create a sheet object in order to modify the file
+            WritableSheet sheet2 = copy.getSheet(0);
+            System.out.println( "remove compound:" + book.get(index).size());
+            //remove the compoumd in the sheet
+            int row = book.get(index).get(0).getRow();
+            sheet2.removeRow(row);
+            success = true;
+            copy.write();
+            copy.close();
+            w.close();
+        } catch (BiffException e) {
+            System.out.println("BiffException : " + e.getMessage());
+        } catch (IOException b) {
+            System.out.println("IOException: " + b.getMessage());
+        } catch (WriteException e) {
+            System.out.println("BiffException : " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return success;
+
+    }
+
+       
+       
+       
 }
